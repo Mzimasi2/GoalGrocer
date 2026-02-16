@@ -1,8 +1,9 @@
+import Home from "./Home";
+
 function App() {
   return (
     <div>
-      <h1>GoalGrocer</h1>
-      <p>Clean Food. Smart Choices.</p>
+      <Home />
     </div>
   )
 }
