@@ -63,4 +63,24 @@
 .subTitle {
   margin: 10px 0 0;
 }
+.goalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.goalBtn {
+  padding: 18px 30px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 16px;
+  cursor: pointer;
+  min-width: 220px;
+  transition: 0.2s ease;
+}
+
+.goalBtn:hover {
+  background: #f3f3f3;
+}
 

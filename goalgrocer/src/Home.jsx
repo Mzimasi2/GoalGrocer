@@ -34,6 +34,12 @@ function Home() {
            <button className="iconBtn" aria-label="Filter">⚙️</button>
 
             </div>
+           {/*Goal buttons */}
+           <div className="goalButtons">
+            <button className="goalBtn">Weight Loss</button>
+            <button className="goalBtn">Maintain Weight</button>
+            <button className="goalBtn">Gain Lean Muscle</button>
+           </div>
 
         </div>
     );
