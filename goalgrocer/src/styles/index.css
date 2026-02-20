@@ -1,0 +1,303 @@
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #0f172a;
+  background: #f3f6f4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 10% 0%, #e8fff0, #f3f6f4 45%);
+}
+
+a {
+  color: inherit;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #ffffff;
+  border-bottom: 1px solid #d8e2dc;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.topnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.nav-link {
+  text-decoration: none;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  color: #334155;
+}
+
+.nav-link-active {
+  background: #d1fae5;
+  color: #065f46;
+  font-weight: 700;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.role-chip {
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: #ecfeff;
+  color: #0e7490;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.2rem;
+}
+
+.page-heading h1 {
+  margin: 0;
+}
+
+.page-heading p {
+  margin-top: 0.3rem;
+  color: #475569;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #d8e2dc;
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hero-card {
+  border-color: #9be8bf;
+  background: linear-gradient(135deg, #f7fff9, #ffffff);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.product-card .card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.pill {
+  background: #ecfdf5;
+  color: #065f46;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.pill-muted {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.pill-hot {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.goal-badge {
+  background: #fff7ed;
+  color: #9a3412;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.stat-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.cards-4 {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.cards-3 {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.field {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.62rem;
+  font: inherit;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.grid-two {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.filter-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.actions-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #047857;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #065f46;
+}
+
+.btn-ghost {
+  background: #fff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.btn-ghost:hover {
+  background: #f8fafc;
+}
+
+.text-link {
+  background: none;
+  border: none;
+  color: #0369a1;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.order-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.55rem;
+}
+
+.qty-field {
+  width: 75px;
+}
+
+.form-card {
+  max-width: 520px;
+}
+
+.error-text {
+  color: #b91c1c;
+  margin: 0;
+}
+
+.helper-text {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.file-btn input {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .topbar {
+    grid-template-columns: 1fr;
+  }
+}

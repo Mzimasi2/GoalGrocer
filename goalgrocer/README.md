@@ -1,16 +1,59 @@
-# React + Vite
+# GoalGrocer (INF4027W Mini Project 2026)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+GoalGrocer is a niche e-commerce platform for clean groceries focused on weight goals (Weight Loss / Maintenance).
 
-Currently, two official plugins are available:
+## Implemented Scope
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Guest role:
+  - Home page with featured products and promotions
+  - Prompt-based recommendation (goal + budget parsing)
+  - Image upload similarity matching (filename-based simulation)
+  - Store search and filters (category, goal, price, tags)
+  - Add to cart and persistent cart in browser
+  - Sign in only when checking out
+- Customer role:
+  - Register/login
+  - Profile with saved goal and budget preferences
+  - Wishlist management
+  - Order history
+  - Weekly meal plans with one-click add ingredients to cart
+- Admin role:
+  - Product CRUD (includes price, cost, calories, protein, category, tags, goal badges)
+  - Category CRUD
+  - Order viewing and filtering (payment type/status)
+  - Reports:
+    - Financial: revenue, cost of sales, profit, revenue by payment type
+    - Product: best-selling, most-viewed, sales by category, promotion performance
+    - Customer: top spending, average order value, purchase frequency, goal distribution
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React + Vite
+- React Router
+- Persistent browser storage used as NoSQL-style collections (`users`, `products`, `categories`, `orders`, `wishlists`, `dishes`) for this MVP.
 
-## Expanding the ESLint configuration
+## Run Locally
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
+
+## Lint
+
+```bash
+npm run lint
+```
+
+## Demo Accounts
+
+- Admin
+  - Email: `admin@goalgrocer.com`
+  - Password: `Admin@123`
+
+Customer accounts are created via the registration page.
+
+## Notes
+
+- Checkout is simulated (Card, Cash, PayPal); no real payment gateway.
+- Inventory and delivery tracking are intentionally out of scope per brief assumptions.
