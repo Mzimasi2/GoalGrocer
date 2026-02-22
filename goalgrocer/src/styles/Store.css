@@ -1,207 +1,180 @@
-/* ===== PAGE STRUCTURE ===== */
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap");
 
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #f5f7f9;
+.store-page {
+  --store-ink: #10231b;
+  --store-muted: #4b5f57;
+  --store-panel: #f7fcf9;
+  --store-line: #d8e8de;
+  --store-brand: #1b8f63;
+  --store-brand-dark: #0f5d40;
+  --store-glow: #b8f0cc;
+  font-family: "Manrope", "Segoe UI", Tahoma, sans-serif;
 }
 
-.storeHeader {
-  padding: 20px 40px;
+.store-page .card {
+  border-radius: 18px;
+  border-color: var(--store-line);
 }
 
-.storeHeader h2 {
-  margin-bottom: 5px;
-}
-
-.storeHeader p {
-  color: #666;
-}
-
-/* ===== NAVBAR ===== */
-
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 40px;
-  background-color: white;
-  border-bottom: 1px solid #ddd;
-}
-
-.logo {
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.navIcons {
-  display: flex;
-  gap: 15px;
-}
-
-.iconBtn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-/* ===== FILTERS ===== */
-
-.filters {
-  display: flex;
-  gap: 15px;
-  padding: 20px 40px;
-  flex-wrap: wrap;
-}
-
-.searchInput {
-  padding: 10px;
-  width: 250px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.select {
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* ===== PRODUCT GRID ===== */
-
-.productGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
-  padding: 20px 40px;
-}
-
-.productCard {
-  background-color: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-  transition: 0.2s ease;
-}
-
-.productCard:hover {
-  transform: translateY(-4px);
-}
-
-/* ===== CARD CONTENT ===== */
-
-.cardTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.productName {
-  font-size: 16px;
-  margin: 0;
-}
-
-.price {
-  font-weight: bold;
-  color: #2e7d32;
-}
-
-.badgesRow {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.badge {
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 20px;
-  background-color: #e0f2f1;
-  color: #00796b;
-}
-
-.badge.ghost {
-  background-color: #f0f0f0;
-  color: #555;
-}
-
-.nutritionRow {
-  display: flex;
-  gap: 20px;
-  margin-top: 15px;
-}
-
-.nutriLabel {
-  font-size: 12px;
-  color: #777;
-}
-
-.nutriValue {
-  font-weight: bold;
-}
-
-/* ===== GOALS ===== */
-
-.goalsRow {
-  margin-top: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.goalPill {
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 20px;
-  background-color: #fff3e0;
-  color: #e65100;
-}
-
-/* ===== BUTTONS ===== */
-
-.cardActions {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-
-.btnPrimary {
-  flex: 1;
-  padding: 8px;
-  border-radius: 6px;
-  border: none;
-  background-color: #2e7d32;
-  color: white;
-  cursor: pointer;
-}
-
-.btnPrimary:hover {
-  background-color: #1b5e20;
-}
-
-.btnGhost {
-  flex: 1;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: white;
-  cursor: pointer;
-}
-.btnGhost:hover {
-  background-color: #f0f0f0;}
-  .iconBtn {
+.store-hero {
   position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 95% 10%, rgba(184, 240, 204, 0.9), transparent 35%),
+    radial-gradient(circle at 10% 100%, rgba(96, 201, 153, 0.22), transparent 46%),
+    linear-gradient(145deg, #fcfffd, #edf8f1);
 }
 
-.cartBadge {
+.store-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+}
+
+.store-eyebrow {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--store-brand-dark);
+  font-size: 0.78rem;
+}
+
+.store-hero h2 {
+  margin: 0.35rem 0 0.5rem;
+  font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+  color: var(--store-ink);
+}
+
+.store-hero p {
+  margin: 0;
+  color: var(--store-muted);
+  line-height: 1.5;
+}
+
+.store-kpi-row {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+}
+
+.store-kpi-row article {
+  border: 1px solid #cfe7d8;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.7rem 0.8rem;
+}
+
+.store-kpi-row small {
+  display: block;
+  color: #587469;
+  font-size: 0.75rem;
+}
+
+.store-kpi-row strong {
+  color: #0f4f37;
+  font-size: 1.05rem;
+}
+
+.store-hero-glow {
   position: absolute;
-  top: -6px;
-  right: -10px;
-  background: #e53935;
-  color: white;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 999px;
+  width: 260px;
+  height: 260px;
+  right: -70px;
+  bottom: -90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--store-glow), transparent 68%);
+  z-index: 0;
+}
+
+.store-filter-panel {
+  background: linear-gradient(180deg, #ffffff, var(--store-panel));
+}
+
+.store-filter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.store-filter-head h3 {
+  margin: 0;
+  color: var(--store-ink);
+}
+
+.store-filter-head p {
+  margin: 0.15rem 0 0;
+  color: #5d746b;
+  font-size: 0.9rem;
+}
+
+.store-filter-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.store-page .field {
+  border-color: #c7ddd0;
+  background: #ffffff;
+}
+
+.store-page .field:focus {
+  outline: 2px solid rgba(27, 143, 99, 0.18);
+  border-color: var(--store-brand);
+}
+
+.store-page .btn-primary {
+  background: linear-gradient(135deg, var(--store-brand), var(--store-brand-dark));
+}
+
+.store-page .btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.store-results-head {
+  margin-bottom: 0.8rem;
+}
+
+.store-results-head h3 {
+  color: var(--store-ink);
+}
+
+.store-results-head small {
+  color: #567265;
+}
+
+.store-product-grid .product-card {
+  border-color: #d4e5db;
+  box-shadow: 0 12px 26px rgba(17, 74, 51, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.store-product-grid .product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 30px rgba(17, 74, 51, 0.12);
+}
+
+.store-product-grid .text-link {
+  color: #114d35;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.store-product-grid .text-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+  .store-kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .store-filter-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

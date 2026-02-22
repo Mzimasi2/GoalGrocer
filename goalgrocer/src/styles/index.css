@@ -200,6 +200,11 @@ a {
   text-decoration: none;
 }
 
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background: #047857;
   color: #fff;

@@ -13,8 +13,9 @@ import {
   toggleWishlistItem,
 } from "../services/db";
 import {
+  hasAiSupport,
+  recommendFromPromptAI,
   recommendFromImageName,
-  recommendFromPrompt,
 } from "../services/recommendation";
 
 export default function Home() {
@@ -29,6 +30,7 @@ export default function Home() {
   const [selectedGoal, setSelectedGoal] = useState(user?.savedGoal || "");
   const [budget, setBudget] = useState(user?.savedBudget || "");
   const [promptResult, setPromptResult] = useState(null);
+  const [isRunningRecommendation, setIsRunningRecommendation] = useState(false);
   const [imageResult, setImageResult] = useState([]);
   const [wishlistIds, setWishlistIds] = useState(() =>
     getWishlistProductIds(user?.id)
@@ -58,9 +60,14 @@ export default function Home() {
     refreshProducts();
   }
 
-  function handlePromptRun() {
-    const result = recommendFromPrompt(products, prompt, selectedGoal, budget);
-    setPromptResult(result);
+  async function handlePromptRun() {
+    setIsRunningRecommendation(true);
+    try {
+      const result = await recommendFromPromptAI(products, prompt, selectedGoal, budget);
+      setPromptResult(result);
+    } finally {
+      setIsRunningRecommendation(false);
+    }
   }
 
   function handleImageUpload(event) {
@@ -91,6 +98,9 @@ export default function Home() {
           Tell the platform what you need. Example: "I want to lose weight under
           R800, high protein."
         </p>
+        <p className="helper-text">
+          Recommendation mode: {hasAiSupport() ? "AI + fallback rules" : "Rules only (AI key not set)"}
+        </p>
 
         <div className="grid-two">
           <input
@@ -109,8 +119,12 @@ export default function Home() {
         </div>
 
         <div className="actions-row">
-          <button className="btn btn-primary" onClick={handlePromptRun}>
-            Recommend products
+          <button
+            className="btn btn-primary"
+            onClick={handlePromptRun}
+            disabled={isRunningRecommendation}
+          >
+            {isRunningRecommendation ? "Generating..." : "Recommend products"}
           </button>
           <select
             className="field"
@@ -136,6 +150,10 @@ export default function Home() {
               Goal: {promptResult.goal || "Any"} | Budget: {promptResult.budget || "Not set"}
             </small>
           </div>
+          <p className="helper-text">
+            Engine: {promptResult.source === "ai" ? "AI model" : "Local rules"} |{" "}
+            {promptResult.sourceNote}
+          </p>
           <div className="product-grid">
             {promptResult.products.map((product) => (
               <ProductCard

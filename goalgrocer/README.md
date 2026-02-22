@@ -6,7 +6,7 @@ GoalGrocer is a niche e-commerce platform for clean groceries focused on weight 
 
 - Guest role:
   - Home page with featured products and promotions
-  - Prompt-based recommendation (goal + budget parsing)
+  - Prompt-based recommendation (AI-powered when API key is configured, with local rule fallback)
   - Image upload similarity matching (filename-based simulation)
   - Store search and filters (category, goal, price, tags)
   - Add to cart and persistent cart in browser
@@ -38,6 +38,20 @@ GoalGrocer is a niche e-commerce platform for clean groceries focused on weight 
 npm install
 npm run dev
 ```
+
+## Optional AI Setup (for rubric marks)
+
+Add these variables to `.env.local`:
+
+```bash
+VITE_AI_API_KEY=your_key_here
+VITE_AI_MODEL=gpt-4o-mini
+VITE_AI_API_BASE_URL=https://api.openai.com/v1
+```
+
+Notes:
+- If `VITE_AI_API_KEY` is missing, the app automatically falls back to local recommendations.
+- The Home page displays which engine was used (`AI model` or `Local rules`) for transparent demo evidence.
 
 ## Lint
 
