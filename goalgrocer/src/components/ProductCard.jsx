@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { currency } from "../services/format";
 
 export default function ProductCard({
@@ -8,8 +9,31 @@ export default function ProductCard({
   onView,
   wishlistActive = false,
 }) {
+  const [imageBroken, setImageBroken] = useState(false);
+
+  const imageUrl = useMemo(() => {
+    if (imageBroken) return "";
+    return String(product.imageUrl || "").trim();
+  }, [imageBroken, product.imageUrl]);
+
   return (
     <article className="card product-card">
+      <div className="product-image-wrap">
+        {imageUrl ? (
+          <img
+            className="product-image"
+            src={imageUrl}
+            alt={product.name}
+            loading="lazy"
+            onError={() => setImageBroken(true)}
+          />
+        ) : (
+          <div className="product-image-fallback" aria-label={`${product.name} image placeholder`}>
+            <span>GoalGrocer</span>
+          </div>
+        )}
+      </div>
+
       <div className="card-head">
         <button className="text-link" onClick={() => onView?.(product)}>
           {product.name}
