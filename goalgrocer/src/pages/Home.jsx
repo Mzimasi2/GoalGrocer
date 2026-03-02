@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import ProductCard from "../components/ProductCard";
@@ -38,6 +38,7 @@ export default function Home() {
   const [wishlistIds, setWishlistIds] = useState(() =>
     getWishlistProductIds(user?.id)
   );
+  const promptRequestRef = useRef(0);
 
   const categoryMap = useMemo(
     () => Object.fromEntries(categories.map((c) => [c.id, c.name])),
@@ -63,15 +64,45 @@ export default function Home() {
     refreshProducts();
   }
 
-  async function handlePromptRun() {
+  const runPromptRecommendation = useCallback(async (inputPrompt) => {
+    const trimmedPrompt = String(inputPrompt || "").trim();
+    if (!trimmedPrompt) {
+      setPromptResult(null);
+      return;
+    }
+
+    const requestId = ++promptRequestRef.current;
     setIsRunningRecommendation(true);
     try {
-      const result = await recommendFromPromptAI(products, prompt, selectedGoal, budget);
-      setPromptResult(result);
+      const result = await recommendFromPromptAI(products, trimmedPrompt, selectedGoal, budget);
+      if (requestId === promptRequestRef.current) {
+        setPromptResult(result);
+      }
     } finally {
-      setIsRunningRecommendation(false);
+      if (requestId === promptRequestRef.current) {
+        setIsRunningRecommendation(false);
+      }
     }
+  }, [products, selectedGoal, budget]);
+
+  function handlePromptRun() {
+    runPromptRecommendation(prompt);
   }
+
+  useEffect(() => {
+    const trimmedPrompt = String(prompt || "").trim();
+    if (!trimmedPrompt) {
+      setPromptResult(null);
+      setIsRunningRecommendation(false);
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      runPromptRecommendation(trimmedPrompt);
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [prompt, runPromptRecommendation]);
 
   async function handleImageUpload(event) {
     const file = event.target.files?.[0];
@@ -106,9 +137,6 @@ export default function Home() {
       <section className="smart-search">
         <div className="smart-row">
           <div className="smart-input-wrap">
-            <span className="smart-icon" aria-hidden>
-              🔎
-            </span>
             <input
               className="smart-input"
               value={prompt}
@@ -184,10 +212,6 @@ export default function Home() {
               Goal: {promptResult.goal || "Any"} | Budget: {promptResult.budget || "Not set"}
             </small>
           </div>
-          <p className="helper-text">
-            Engine: {promptResult.source === "ai" ? "AI model" : "Local rules"} |{" "}
-            {promptResult.sourceNote}
-          </p>
           <div className="product-grid home-product-grid">
             {promptResult.products.map((product) => (
               <ProductCard
@@ -294,3 +318,5 @@ export default function Home() {
     </AppShell>
   );
 }
+
+

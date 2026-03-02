@@ -2,22 +2,34 @@ import AppShell from "../../components/AppShell";
 import { buildReports } from "../../services/db";
 import { currency } from "../../services/format";
 
-function MetricBars({ rows, valueKey, labelKey, formatter = (value) => value }) {
+const CHART_COLORS = ["#dc2626", "#16a34a", "#eab308"];
+
+function MetricBars({
+  rows,
+  valueKey,
+  labelKey,
+  formatter = (value) => value,
+  metaFormatter = null,
+}) {
   const max = Math.max(...rows.map((row) => Number(row[valueKey] || 0)), 1);
 
   return (
     <div className="metric-bars">
-      {rows.map((row) => {
+      {rows.map((row, index) => {
         const value = Number(row[valueKey] || 0);
         const width = `${Math.max(6, Math.round((value / max) * 100))}%`;
+        const color = CHART_COLORS[index % CHART_COLORS.length];
         return (
           <article key={row.id || row[labelKey]} className="metric-row">
             <div className="metric-row-head">
-              <strong>{row[labelKey]}</strong>
+              <div className="metric-row-label">
+                <strong>{row[labelKey]}</strong>
+                {metaFormatter && <small>{metaFormatter(row)}</small>}
+              </div>
               <span>{formatter(value)}</span>
             </div>
             <div className="metric-track">
-              <div className="metric-fill" style={{ width }} />
+              <div className="metric-fill" style={{ width, backgroundColor: color }} />
             </div>
           </article>
         );
@@ -26,8 +38,69 @@ function MetricBars({ rows, valueKey, labelKey, formatter = (value) => value }) 
   );
 }
 
+function PieChart({ rows, valueKey, labelKey, formatter = (value) => value }) {
+  const normalized = rows
+    .map((row, index) => ({
+      id: row.id || row[labelKey] || `${labelKey}-${index}`,
+      label: String(row[labelKey] || "Unknown"),
+      value: Math.max(0, Number(row[valueKey] || 0)),
+      color: CHART_COLORS[index % CHART_COLORS.length],
+    }))
+    .filter((row) => row.value > 0);
+
+  const total = normalized.reduce((sum, row) => sum + row.value, 0);
+  const slices = [];
+  let cursor = 0;
+  for (const row of normalized) {
+    const start = cursor;
+    const span = total > 0 ? (row.value / total) * 360 : 0;
+    cursor += span;
+    slices.push(`${row.color} ${start.toFixed(2)}deg ${cursor.toFixed(2)}deg`);
+  }
+  const background = slices.length
+    ? `conic-gradient(${slices.join(", ")})`
+    : "conic-gradient(#e2e8f0 0deg 360deg)";
+
+  return (
+    <div className="pie-layout">
+      <div className="pie-chart-wrap">
+        <div className="pie-chart" style={{ background }} aria-label="Pie chart" />
+        <div className="pie-center">
+          <strong>{formatter(total)}</strong>
+          <small>Total</small>
+        </div>
+      </div>
+      <div className="pie-legend">
+        {normalized.map((row) => {
+          const percent = total > 0 ? Math.round((row.value / total) * 100) : 0;
+          return (
+            <div key={row.id} className="pie-legend-row">
+              <span className="pie-dot" style={{ backgroundColor: row.color }} />
+              <span className="pie-label">{row.label}</span>
+              <span className="pie-value">{formatter(row.value)}</span>
+              <span className="pie-percent">{percent}%</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminReports() {
   const reports = buildReports();
+  const paymentRows = Object.entries(reports.financial.revenueByPayment).map(([type, value]) => ({
+    id: type,
+    label: type,
+    value,
+  }));
+  const goalRows = Object.entries(reports.customer.goalPreferenceDistribution).map(
+    ([goal, count]) => ({
+      id: goal,
+      label: goal,
+      count,
+    })
+  );
 
   return (
     <AppShell title="Admin Reports" subtitle="Financial, product, and customer insights.">
@@ -48,24 +121,12 @@ export default function AdminReports() {
 
       <section className="card">
         <h3>Revenue by Payment Type</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Payment Type</th>
-                <th>Revenue</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(reports.financial.revenueByPayment).map(([type, value]) => (
-                <tr key={type}>
-                  <td>{type}</td>
-                  <td>{currency(value)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PieChart
+          rows={paymentRows}
+          labelKey="label"
+          valueKey="value"
+          formatter={(value) => currency(value)}
+        />
       </section>
 
       <section className="card">
@@ -90,63 +151,35 @@ export default function AdminReports() {
 
       <section className="card">
         <h3>Sales by Category</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Sales</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.product.salesByCategory.map((row) => (
-                <tr key={row.categoryId}>
-                  <td>{row.categoryName}</td>
-                  <td>{currency(row.sales)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <MetricBars
+          rows={reports.product.salesByCategory}
+          labelKey="categoryName"
+          valueKey="sales"
+          formatter={(value) => currency(value)}
+        />
       </section>
 
       <section className="card">
         <h3>Top Spending Customers</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Email</th>
-                <th>Total Spend</th>
-                <th>Order Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.customer.topSpendingCustomers.map((row) => (
-                <tr key={row.userId}>
-                  <td>{row.name}</td>
-                  <td>{row.email}</td>
-                  <td>{currency(row.totalSpend)}</td>
-                  <td>{row.orderCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <MetricBars
+          rows={reports.customer.topSpendingCustomers}
+          labelKey="name"
+          valueKey="totalSpend"
+          formatter={(value) => currency(value)}
+          metaFormatter={(row) => `${row.email} | ${row.orderCount} orders`}
+        />
       </section>
 
       <section className="card">
         <h3>Customer Metrics</h3>
         <p>Average Order Value: {currency(reports.customer.averageOrderValue)}</p>
         <h4>Goal Preference Distribution</h4>
-        <ul>
-          {Object.entries(reports.customer.goalPreferenceDistribution).map(([goal, count]) => (
-            <li key={goal}>
-              {goal}: {count}
-            </li>
-          ))}
-        </ul>
+        <PieChart
+          rows={goalRows}
+          labelKey="label"
+          valueKey="count"
+          formatter={(value) => `${value} users`}
+        />
       </section>
     </AppShell>
   );

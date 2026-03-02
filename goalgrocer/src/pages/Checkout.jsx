@@ -45,7 +45,7 @@ export default function Checkout() {
   }
 
   return (
-    <AppShell title="Checkout" subtitle="Payment simulation and order confirmation.">
+    <AppShell title="Checkout" subtitle="Secure payment and order confirmation.">
       {!hasItems ? (
         <section className="card">
           <p>Your cart is empty.</p>
@@ -107,7 +107,7 @@ export default function Checkout() {
                 onClick={handlePlaceOrder}
                 disabled={isPlacing}
               >
-                {isPlacing ? "Placing order..." : "Confirm payment"}
+                {isPlacing ? "Processing payment..." : "Pay now"}
               </button>
             </div>
           </section>

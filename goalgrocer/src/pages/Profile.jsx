@@ -8,10 +8,25 @@ export default function Profile() {
   const [fullName, setFullName] = useState(user?.fullName || "");
   const [savedGoal, setSavedGoal] = useState(user?.savedGoal || "");
   const [savedBudget, setSavedBudget] = useState(user?.savedBudget || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
 
-  function handleSave(event) {
+  async function handleSave(event) {
     event.preventDefault();
-    savePreferences({ fullName, savedGoal, savedBudget });
+    setIsSaving(true);
+    setSaveMessage("");
+    setSaveError("");
+
+    try {
+      await Promise.resolve(savePreferences({ fullName, savedGoal, savedBudget }));
+      setSaveMessage("Profile saved successfully.");
+      setTimeout(() => setSaveMessage(""), 2000);
+    } catch (error) {
+      setSaveError(error?.message || "Failed to save profile.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -43,9 +58,11 @@ export default function Profile() {
             placeholder="Weekly budget"
           />
 
-          <button className="btn btn-primary" type="submit">
-            Save profile
+          <button className="btn btn-primary" type="submit" disabled={isSaving}>
+            {isSaving ? "Saving..." : "Save profile"}
           </button>
+          {saveMessage && <p className="success-text">{saveMessage}</p>}
+          {saveError && <p className="error-text">{saveError}</p>}
         </form>
 
         <div className="actions-row profile-actions">

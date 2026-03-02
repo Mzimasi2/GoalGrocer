@@ -1,73 +1,62 @@
 # GoalGrocer (INF4027W Mini Project 2026)
 
-GoalGrocer is a niche e-commerce platform for clean groceries focused on weight goals (Weight Loss / Maintenance).
+GoalGrocer is a nutrition-focused e-commerce app with customer and admin workflows, recommendations, meal plans, and reporting.
 
-## Implemented Scope
+## How To Run The Application
 
-- Guest role:
-  - Home page with featured products and promotions
-  - Prompt-based recommendation (AI-powered when API key is configured, with local rule fallback)
-  - Image upload similarity matching (filename-based simulation)
-  - Store search and filters (category, goal, price, tags)
-  - Add to cart and persistent cart in browser
-  - Sign in only when checking out
-- Customer role:
-  - Register/login
-  - Profile with saved goal and budget preferences
-  - Wishlist management
-  - Order history
-  - Weekly meal plans with one-click add ingredients to cart
-- Admin role:
-  - Product CRUD (includes price, cost, calories, protein, category, tags, goal badges)
-  - Category CRUD
-  - Order viewing and filtering (payment type/status)
-  - Reports:
-    - Financial: revenue, cost of sales, profit, revenue by payment type
-    - Product: best-selling, most-viewed, sales by category, promotion performance
-    - Customer: top spending, average order value, purchase frequency, goal distribution
+## 1) Prerequisites
+- Node.js 18+ (or newer LTS)
+- npm 9+
+- A Firebase project (Firestore + Authentication + Storage)
 
-## Tech Stack
-
-- React + Vite
-- React Router
-- Persistent browser storage used as NoSQL-style collections (`users`, `products`, `categories`, `orders`, `wishlists`, `dishes`) for this MVP.
-
-## Run Locally
-
+## 2) Install dependencies
 ```bash
 npm install
-npm run dev
 ```
 
-## Optional AI Setup (for rubric marks)
-
-Add these variables to `.env.local`:
+## 3) Configure environment variables
+Create `.env.local` in the project root (or copy from `.env.example`) and set:
 
 ```bash
-VITE_AI_API_KEY=your_key_here
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+# Optional AI image/prompt recommendations
+VITE_AI_API_KEY=your_openai_api_key
 VITE_AI_MODEL=gpt-4o-mini
 VITE_AI_API_BASE_URL=https://api.openai.com/v1
 ```
 
 Notes:
-- If `VITE_AI_API_KEY` is missing, the app automatically falls back to local recommendations.
-- The Home page displays which engine was used (`AI model` or `Local rules`) for transparent demo evidence.
+- If `VITE_AI_API_KEY` is not set, recommendation flow falls back to local image/rule matching.
+- Never commit `.env.local`.
 
-## Lint
+## 4) Start development server
+```bash
+npm run dev
+```
 
+Then open the local URL shown in terminal (usually `http://localhost:5173`).
+
+## 5) Build for production
+```bash
+npm run build
+npm run preview
+```
+
+## 6) Lint
 ```bash
 npm run lint
 ```
 
 ## Demo Accounts
-
 - Admin
   - Email: `admin@goalgrocer.com`
   - Password: `Admin@123`
-
-Customer accounts are created via the registration page.
-
-## Notes
-
-- Checkout is simulated (Card, Cash, PayPal); no real payment gateway.
-- Inventory and delivery tracking are intentionally out of scope per brief assumptions.
+- Customer
+  - Register via the `Create account` page

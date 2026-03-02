@@ -7,13 +7,15 @@ export default function OrderSuccess() {
   const order = raw ? JSON.parse(raw) : null;
 
   return (
-    <AppShell title="Order Complete" subtitle="Your payment simulation is successful.">
+    <AppShell title="Order Complete" subtitle="Your payment was successful.">
       {!order ? (
         <section className="card">
           <p>No recent order found.</p>
-          <Link className="btn btn-primary" to="/store">
-            Continue shopping
-          </Link>
+          <div className="actions-row" style={{ justifyContent: "center", marginTop: 12 }}>
+            <Link className="btn btn-primary" to="/store">
+              Continue shopping
+            </Link>
+          </div>
         </section>
       ) : (
         <section className="card">
@@ -33,18 +35,35 @@ export default function OrderSuccess() {
           <div className="order-list">
             {order.items.map((item) => (
               <article key={item.productId} className="order-row">
-                <span>
-                  {item.name} x {item.qty}
-                </span>
+                <div className="checkout-item-main">
+                  <div className="checkout-item-image-wrap">
+                    {item.imageUrl ? (
+                      <img
+                        className="checkout-item-image"
+                        src={item.imageUrl}
+                        alt={item.name}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="checkout-item-image-fallback">GoalGrocer</div>
+                    )}
+                  </div>
+                  <div className="checkout-item-detail">
+                    <strong>{item.name}</strong>
+                    <small>Qty: {item.qty}</small>
+                  </div>
+                </div>
                 <strong>{currency(item.lineTotal)}</strong>
               </article>
             ))}
           </div>
 
           <h3>Total: {currency(order.subTotal)}</h3>
-          <Link className="btn btn-primary" to="/store">
-            Continue shopping
-          </Link>
+          <div className="actions-row" style={{ justifyContent: "center", marginTop: 12 }}>
+            <Link className="btn btn-primary" to="/store">
+              Continue shopping
+            </Link>
+          </div>
         </section>
       )}
     </AppShell>
