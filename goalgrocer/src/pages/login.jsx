@@ -12,7 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const redirectTo = location.state?.from || "/checkout";
+  const redirectTo = location.state?.from || "/";
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -20,7 +20,8 @@ export default function Login() {
 
     try {
       await login(email, password);
-      navigate(redirectTo, { replace: true });
+      const isAdminLogin = email.trim().toLowerCase() === "admin@goalgrocer.com";
+      navigate(isAdminLogin ? "/" : redirectTo, { replace: true });
     } catch (err) {
       setError(err.message || "Failed to sign in.");
     }

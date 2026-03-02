@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import { createOrder } from "../services/db";
+import { createOrder, listProducts } from "../services/db";
 import { currency } from "../services/format";
 
 export default function Checkout() {
@@ -13,6 +13,11 @@ export default function Checkout() {
 
   const [paymentType, setPaymentType] = useState("Card");
   const [isPlacing, setIsPlacing] = useState(false);
+  const products = useMemo(() => listProducts(), []);
+  const productMap = useMemo(
+    () => Object.fromEntries(products.map((product) => [product.id, product])),
+    [products]
+  );
 
   const hasItems = useMemo(
     () => Array.isArray(cartItems) && cartItems.length > 0,
@@ -28,6 +33,7 @@ export default function Checkout() {
         userId: user.id,
         items: cartItems,
         paymentType,
+        actor: user,
       });
 
       localStorage.setItem("goalgrocer_last_order", JSON.stringify(order));
@@ -53,10 +59,25 @@ export default function Checkout() {
             <h3>Order Summary</h3>
             <div className="order-list">
               {cartItems.map((item) => (
-                <article key={item.id} className="order-row">
-                  <span>
-                    {item.name} x {item.qty}
-                  </span>
+                <article key={item.id} className="order-row checkout-item-row">
+                  <div className="checkout-item-main">
+                    <div className="checkout-item-image-wrap">
+                      {item.imageUrl || productMap[item.id]?.imageUrl ? (
+                        <img
+                          className="checkout-item-image"
+                          src={item.imageUrl || productMap[item.id]?.imageUrl}
+                          alt={item.name}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="checkout-item-image-fallback">GoalGrocer</div>
+                      )}
+                    </div>
+                    <div className="checkout-item-detail">
+                      <strong>{item.name}</strong>
+                      <small>Qty: {item.qty}</small>
+                    </div>
+                  </div>
                   <strong>{currency(item.price * item.qty)}</strong>
                 </article>
               ))}

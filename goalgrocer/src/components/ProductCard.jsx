@@ -16,9 +16,17 @@ export default function ProductCard({
     return String(product.imageUrl || "").trim();
   }, [imageBroken, product.imageUrl]);
 
+  const badgeLabel = useMemo(() => {
+    if (product.isPromotion) return "Promo";
+    if ((product.soldCount || 0) >= 120) return "Best seller";
+    if ((product.viewsCount || 0) <= 8) return "New";
+    return "";
+  }, [product.isPromotion, product.soldCount, product.viewsCount]);
+
   return (
     <article className="card product-card">
-      <div className="product-image-wrap">
+      <div className="product-media">
+        {badgeLabel && <span className="product-badge">{badgeLabel}</span>}
         {imageUrl ? (
           <img
             className="product-image"
@@ -34,57 +42,46 @@ export default function ProductCard({
         )}
       </div>
 
-      <div className="card-head">
-        <button className="text-link" onClick={() => onView?.(product)}>
-          {product.name}
-        </button>
-        <strong>{currency(product.price)}</strong>
-      </div>
-
-      <div className="meta-row">
-        <span className="pill">{categoryName || "Uncategorized"}</span>
-        {product.isPromotion && <span className="pill pill-hot">Promo</span>}
-      </div>
-
-      <div className="meta-row">
-        {(product.tags || []).slice(0, 3).map((tag) => (
-          <span key={tag} className="pill pill-muted">
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      <div className="stat-grid">
-        <div>
-          <small>Calories</small>
-          <div>{product.calories}</div>
-        </div>
-        <div>
-          <small>Protein</small>
-          <div>{product.protein}g</div>
-        </div>
-        <div>
-          <small>Views</small>
-          <div>{product.viewsCount || 0}</div>
-        </div>
-      </div>
-
-      <div className="meta-row">
-        {(product.goalBadges || []).map((goal) => (
-          <span key={goal} className="goal-badge">
-            {goal}
-          </span>
-        ))}
-      </div>
-
-      <div className="actions-row">
-        <button className="btn btn-primary" onClick={() => onAdd?.(product)}>
-          Add to cart
-        </button>
-        {onWishlist && (
-          <button className="btn btn-ghost" onClick={() => onWishlist?.(product)}>
-            {wishlistActive ? "Saved" : "Wishlist"}
+      <div className="product-body">
+        <div className="product-top-row">
+          <button className="product-title" title={product.name} onClick={() => onView?.(product)}>
+            {product.name}
           </button>
+          <strong className="product-price">{currency(product.price)}</strong>
+        </div>
+
+        <div className="product-meta">
+          <span>{categoryName || "Uncategorized"}</span>
+          <span>•</span>
+          <span>{product.protein}g protein</span>
+          <span>•</span>
+          <span>{product.calories} kcal</span>
+        </div>
+
+        <div className="product-tag-row">
+          {(product.goalBadges || []).slice(0, 3).map((goal) => (
+            <span key={goal} className="goal-badge">
+              {goal}
+            </span>
+          ))}
+          {(product.tags || []).slice(0, 2).map((tag) => (
+            <span key={tag} className="pill pill-muted">
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="product-actions">
+          <button className="btn btn-primary" onClick={() => onAdd?.(product)}>
+            Add to cart
+          </button>
+        </div>
+        {onWishlist && (
+          <div className="product-wishlist-row">
+            <button className="btn btn-ghost" onClick={() => onWishlist?.(product)}>
+              {wishlistActive ? "Saved" : "Wishlist"}
+            </button>
+          </div>
         )}
       </div>
     </article>

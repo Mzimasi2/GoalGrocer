@@ -16,7 +16,7 @@ export default function Profile() {
 
   return (
     <AppShell title="Profile" subtitle="Manage your goal and budget preferences.">
-      <section className="card form-card">
+      <section className="card form-card profile-card">
         <form onSubmit={handleSave} className="form-grid">
           <input
             className="field"
@@ -48,7 +48,7 @@ export default function Profile() {
           </button>
         </form>
 
-        <div className="actions-row">
+        <div className="actions-row profile-actions">
           <Link className="btn btn-ghost" to="/wishlist">
             Open wishlist
           </Link>

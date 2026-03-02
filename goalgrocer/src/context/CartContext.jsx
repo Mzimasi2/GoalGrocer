@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const CartContext = createContext(null);
 const STORAGE_KEY = "goalgrocer_cart_v2";
+const MIN_QTY = 1;
+const MAX_QTY = 99;
 
 function readCart() {
   try {
@@ -21,12 +23,14 @@ export function CartProvider({ children }) {
   }, [cartItems]);
 
   function addToCart(product, qty = 1) {
-    const safeQty = Math.max(1, Number(qty) || 1);
+    const safeQty = Math.min(MAX_QTY, Math.max(MIN_QTY, Math.trunc(Number(qty) || 1)));
     setCartItems((prev) => {
       const existing = prev.find((i) => i.id === product.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === product.id ? { ...i, qty: i.qty + safeQty } : i
+          i.id === product.id
+            ? { ...i, qty: Math.min(MAX_QTY, i.qty + safeQty) }
+            : i
         );
       }
       return [
@@ -36,6 +40,12 @@ export function CartProvider({ children }) {
           name: product.name,
           price: product.price,
           cost: product.cost,
+          imageUrl: product.imageUrl || "",
+          categoryId: product.categoryId || "",
+          calories: Number(product.calories) || 0,
+          protein: Number(product.protein) || 0,
+          tags: Array.isArray(product.tags) ? product.tags : [],
+          goalBadges: Array.isArray(product.goalBadges) ? product.goalBadges : [],
           qty: safeQty,
         },
       ];
@@ -51,11 +61,11 @@ export function CartProvider({ children }) {
   }
 
   function setQty(id, qty) {
-    const amount = Number(qty);
+    const amount = Math.min(MAX_QTY, Math.max(MIN_QTY, Math.trunc(Number(qty) || MIN_QTY)));
     setCartItems((prev) =>
       prev
         .map((item) => (item.id === id ? { ...item, qty: amount } : item))
-        .filter((item) => item.qty > 0)
+        .filter((item) => item.qty >= MIN_QTY && item.qty <= MAX_QTY)
     );
   }
 

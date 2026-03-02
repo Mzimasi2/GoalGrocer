@@ -99,6 +99,103 @@ a {
   background: linear-gradient(135deg, #f7fff9, #ffffff);
 }
 
+.homeHero {
+  padding: 34px 0 16px;
+  text-align: center;
+}
+
+.homeTitle {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.homeSub {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: #475569;
+}
+
+.smart-search {
+  background: #fff;
+  border: 1px solid #d7efe5;
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  max-width: 980px;
+  margin: 16px auto 26px;
+}
+
+.smart-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.smart-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: #f8fafc;
+}
+
+.smart-icon {
+  opacity: 0.7;
+}
+
+.smart-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+}
+
+.smart-primary,
+.smart-ghost {
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 800;
+}
+
+.smart-advanced {
+  margin-top: 12px;
+  border-top: 1px solid #eef2f7;
+  padding-top: 12px;
+}
+
+.smart-advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.advanced-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.smart-upload {
+  width: 100%;
+  justify-content: center;
+  display: inline-flex;
+}
+
+.smart-hint {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
@@ -114,9 +211,11 @@ a {
   margin-top: 0.65rem;
 }
 
-.product-image-wrap {
+.product-image-wrap,
+.product-media {
   width: calc(100% + 2rem);
   margin: -1rem -1rem 0;
+  position: relative;
 }
 
 .product-image {
@@ -128,6 +227,90 @@ a {
   border-top-right-radius: 14px;
   border-bottom: 1px solid #e2e8f0;
   background: #e2e8f0;
+}
+
+.product-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+}
+
+.product-quick-add {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+.product-body {
+  margin-top: 0.65rem;
+}
+
+.product-top-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.product-title {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  color: #0f172a;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.product-price {
+  white-space: nowrap;
+}
+
+.product-meta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.55rem;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.product-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.product-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.home-product-grid .product-actions {
+  display: block;
+}
+
+.home-product-grid .product-actions .btn-primary {
+  width: 100%;
+}
+
+.home-product-grid .product-wishlist-row {
+  margin-top: 8px;
+}
+
+.home-product-grid .product-wishlist-row .btn-ghost {
+  width: 100%;
+}
+
+.btn-outline {
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
 }
 
 .product-image-fallback {
@@ -287,12 +470,80 @@ a {
   padding: 0.55rem;
 }
 
+.checkout-item-row {
+  align-items: center;
+}
+
+.checkout-item-main {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.checkout-item-image-wrap {
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #d9e4de;
+  background: #e9eef4;
+}
+
+.checkout-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.checkout-item-image-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #294a3c;
+}
+
+.checkout-item-detail {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.checkout-item-detail small {
+  color: #64748b;
+}
+
 .qty-field {
   width: 75px;
 }
 
 .form-card {
   max-width: 520px;
+}
+
+.profile-card {
+  margin: 0 auto;
+  max-width: 700px;
+  padding: 1.1rem;
+}
+
+.profile-card .btn-primary {
+  width: 100%;
+}
+
+.profile-actions {
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
+.profile-actions .btn-ghost {
+  min-width: 180px;
+  text-align: center;
 }
 
 .error-text {
@@ -321,18 +572,337 @@ td {
   border-bottom: 1px solid #e2e8f0;
 }
 
+.metric-bars {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.metric-row {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  background: #fff;
+}
+
+.metric-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+
+.metric-row-head strong {
+  font-size: 0.95rem;
+}
+
+.metric-row-head span {
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.metric-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.metric-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #1dbf73, #17a563);
+}
+
 .dish-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.meal-plan-card {
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.meal-plan-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 42px rgba(15, 23, 42, 0.1);
+}
+
+.meal-plan-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.meal-plan-card h4,
+.meal-plan-card p,
+.meal-plan-card .meal-plan-btn {
+  margin-left: 18px;
+  margin-right: 18px;
+}
+
+.meal-plan-card h4 {
+  margin-top: 14px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.meal-plan-card p {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.meal-plan-btn {
+  margin-bottom: 18px;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-weight: 600;
+  font-size: 15px;
+  background: linear-gradient(135deg, #1dbf73, #17a563);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 18px rgba(29, 191, 115, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meal-plan-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(29, 191, 115, 0.45);
+  background: linear-gradient(135deg, #21d07a, #1dbf73);
+}
+
+.meal-plan-btn:active {
+  transform: scale(0.98);
+}
+
+.meal-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.meal-day-card {
+  border: 1px solid #d8e2dc;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.meal-day-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.meal-day-image-fallback {
+  height: 180px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ecfdf5, #dcfce7);
+  color: #065f46;
+  font-weight: 800;
+}
+
+.meal-day-body {
+  padding: 12px;
+}
+
+.meal-day-body h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.meal-day-body p {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.meal-day-body p:last-child {
+  margin-bottom: 0;
+}
+
+.meal-day-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.meal-experience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.meal-card {
+  border: 1px solid #f1f1f1;
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  transition: 0.3s ease;
+}
+
+.meal-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.meal-card-image {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+
+.meal-card-image-fallback {
+  height: 190px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #ecfdf5, #dcfce7);
+  color: #065f46;
+  font-weight: 800;
+}
+
+.meal-card-body {
+  padding: 14px;
+}
+
+.meal-card-slot {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.meal-card-body h4 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.meal-card-macros {
+  margin: 8px 0 10px;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.meal-badge-row {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.meal-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-size: 12px;
+}
+
+.meal-toggle-btn {
+  width: 100%;
+}
+
+.meal-upload-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  justify-content: center;
+  display: inline-flex;
+}
+
+.meal-plan-actions {
+  justify-content: center;
+}
+
+.meal-ingredients-list {
+  margin: 0.55rem 0 0;
+  padding-left: 1rem;
+  color: #334155;
+}
+
+.meal-ingredients-list li {
+  margin-bottom: 0.25rem;
 }
 
 .file-btn input {
   display: none;
 }
 
+@media (max-width: 1100px) {
+  .dish-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .meal-schedule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .meal-experience-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 860px) {
   .topbar {
     grid-template-columns: 1fr;
+  }
+
+  .smart-row {
+    grid-template-columns: 1fr;
+  }
+
+  .smart-advanced-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meal-schedule-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meal-experience-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .dish-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-actions .btn-ghost {
+    width: 100%;
+    min-width: 0;
   }
 }

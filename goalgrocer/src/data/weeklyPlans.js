@@ -2,14 +2,20 @@ export const GOAL_PLAN_CARDS = [
   {
     goal: "Weight Loss",
     summary: "Lower-calorie, high-protein week plan for fat loss.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=80",
   },
   {
     goal: "Maintenance",
     summary: "Balanced calories and protein for healthy maintenance.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
   },
   {
     goal: "Lean Muscle",
     summary: "Higher-protein meals to support lean muscle goals.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
   },
 ];
 

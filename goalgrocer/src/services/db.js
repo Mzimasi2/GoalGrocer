@@ -7,7 +7,13 @@ import {
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
-import { seedCategories, seedDishes, seedProducts, seedUsers } from "../data/seedData";
+import {
+  seedCategories,
+  seedDishes,
+  seedMealPlans,
+  seedProducts,
+  seedUsers,
+} from "../data/seedData";
 import { firestore } from "./firebase";
 
 const COLLECTIONS = {
@@ -17,6 +23,7 @@ const COLLECTIONS = {
   orders: "orders",
   wishlists: "wishlists",
   dishes: "dishes",
+  mealPlans: "mealPlans",
 };
 
 let initialized = false;
@@ -27,6 +34,7 @@ let dbState = {
   orders: [],
   wishlists: [],
   dishes: [],
+  mealPlans: [],
 };
 
 function makeId(prefix) {
@@ -37,6 +45,73 @@ function withoutId(entity) {
   const copy = { ...entity };
   delete copy.id;
   return copy;
+}
+
+function normalizeText(value, max = 200) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
+}
+
+function normalizeEmail(value) {
+  return normalizeText(value, 254).toLowerCase();
+}
+
+function parseNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function clampNumber(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function normalizeInt(value, min, max, fallback) {
+  const parsed = Math.trunc(parseNumber(value, fallback));
+  return clampNumber(parsed, min, max);
+}
+
+function normalizeList(value, maxItems = 8, maxLen = 40) {
+  const array = Array.isArray(value)
+    ? value
+    : String(value || "")
+        .split(",")
+        .map((item) => item.trim());
+  return [...new Set(array.map((item) => normalizeText(item, maxLen)).filter(Boolean))].slice(
+    0,
+    maxItems
+  );
+}
+
+function normalizeImageUrl(value) {
+  const url = normalizeText(value, 1000);
+  if (!url) return "";
+  if (!/^https:\/\/|^http:\/\//i.test(url)) {
+    throw new Error("Image URL must start with http:// or https://");
+  }
+  return url;
+}
+
+function requireAuthenticated(actor) {
+  if (!actor?.id && !actor?.authUid) {
+    throw new Error("Authentication required.");
+  }
+}
+
+function requireAdmin(actor) {
+  requireAuthenticated(actor);
+  if (actor.role !== "admin") {
+    throw new Error("Admin access required.");
+  }
+}
+
+function requireSelfOrAdmin(targetUserId, actor) {
+  requireAuthenticated(actor);
+  if (actor.role === "admin") return;
+  if (actor.id !== targetUserId && actor.authUid !== targetUserId) {
+    throw new Error("Not authorized to update this profile.");
+  }
 }
 
 async function fetchCollection(name) {
@@ -68,6 +143,10 @@ async function seedIfEmpty() {
     batch.set(doc(firestore, COLLECTIONS.dishes, dish.id), withoutId(dish));
   }
 
+  for (const mealPlan of seedMealPlans) {
+    batch.set(doc(firestore, COLLECTIONS.mealPlans, mealPlan.id), withoutId(mealPlan));
+  }
+
   for (const user of seedUsers) {
     batch.set(doc(firestore, COLLECTIONS.users, user.id), withoutId(user));
   }
@@ -75,22 +154,128 @@ async function seedIfEmpty() {
   await batch.commit();
 }
 
+async function ensureMealPlansSeeded() {
+  const plans = await fetchCollection(COLLECTIONS.mealPlans);
+  if (plans.length) return;
+
+  const batch = writeBatch(firestore);
+  for (const mealPlan of seedMealPlans) {
+    batch.set(doc(firestore, COLLECTIONS.mealPlans, mealPlan.id), withoutId(mealPlan));
+  }
+  await batch.commit();
+}
+
+function normalizeMealSlot(slotValue) {
+  if (typeof slotValue === "string") {
+    return { title: slotValue, imageUrl: "" };
+  }
+  if (slotValue && typeof slotValue === "object") {
+    return {
+      title: String(slotValue.title || ""),
+      imageUrl: String(slotValue.imageUrl || ""),
+    };
+  }
+  return { title: "", imageUrl: "" };
+}
+
+async function migrateMealPlanScheduleFormat() {
+  const plans = await fetchCollection(COLLECTIONS.mealPlans);
+
+  await Promise.all(
+    plans.map(async (plan) => {
+      const schedule = plan.schedule || {};
+      let changed = false;
+      const normalizedSchedule = {};
+
+      for (const [day, meals] of Object.entries(schedule)) {
+        const normalizedDay = {
+          breakfast: normalizeMealSlot(meals?.breakfast),
+          lunch: normalizeMealSlot(meals?.lunch),
+          dinner: normalizeMealSlot(meals?.dinner),
+        };
+
+        if (
+          typeof meals?.breakfast === "string" ||
+          typeof meals?.lunch === "string" ||
+          typeof meals?.dinner === "string"
+        ) {
+          changed = true;
+        }
+
+        normalizedSchedule[day] = normalizedDay;
+      }
+
+      if (!changed) return;
+
+      await persistSet(COLLECTIONS.mealPlans, plan.id, {
+        ...plan,
+        schedule: normalizedSchedule,
+      });
+    })
+  );
+}
+
+const DEFAULT_MEAL_IMAGES = {
+  breakfast:
+    "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80",
+  lunch:
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
+  dinner:
+    "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80",
+};
+
+async function backfillMissingMealImageUrls() {
+  const plans = await fetchCollection(COLLECTIONS.mealPlans);
+
+  await Promise.all(
+    plans.map(async (plan) => {
+      const schedule = plan.schedule || {};
+      let changed = false;
+      const nextSchedule = {};
+
+      for (const [day, meals] of Object.entries(schedule)) {
+        const nextDay = {};
+        for (const slot of ["breakfast", "lunch", "dinner"]) {
+          const current = meals?.[slot];
+          const normalized = normalizeMealSlot(current);
+          if (!normalized.imageUrl) {
+            normalized.imageUrl = DEFAULT_MEAL_IMAGES[slot] || "";
+            changed = true;
+          }
+          nextDay[slot] = normalized;
+        }
+        nextSchedule[day] = nextDay;
+      }
+
+      if (!changed) return;
+      await persistSet(COLLECTIONS.mealPlans, plan.id, {
+        ...plan,
+        schedule: nextSchedule,
+      });
+    })
+  );
+}
+
 async function loadAllCollections() {
-  const [users, categories, products, orders, wishlists, dishes] = await Promise.all([
+  const [users, categories, products, orders, wishlists, dishes, mealPlans] = await Promise.all([
     fetchCollection(COLLECTIONS.users),
     fetchCollection(COLLECTIONS.categories),
     fetchCollection(COLLECTIONS.products),
     fetchCollection(COLLECTIONS.orders),
     fetchCollection(COLLECTIONS.wishlists),
     fetchCollection(COLLECTIONS.dishes),
+    fetchCollection(COLLECTIONS.mealPlans),
   ]);
 
-  dbState = { users, categories, products, orders, wishlists, dishes };
+  dbState = { users, categories, products, orders, wishlists, dishes, mealPlans };
 }
 
 export async function initializeDb() {
   if (initialized) return dbState;
   await seedIfEmpty();
+  await ensureMealPlansSeeded();
+  await migrateMealPlanScheduleFormat();
+  await backfillMissingMealImageUrls();
   await loadAllCollections();
   initialized = true;
   return dbState;
@@ -114,6 +299,73 @@ export function listCategories() {
 
 export function listDishes() {
   return ensureDb().dishes;
+}
+
+export function listMealPlans() {
+  return ensureDb().mealPlans;
+}
+
+export function upsertMealPlan(mealPlan) {
+  requireAdmin(mealPlan?.actor);
+
+  const schedule = mealPlan.schedule || {};
+  const normalizedSchedule = {};
+  for (const [day, meals] of Object.entries(schedule)) {
+    normalizedSchedule[day] = {
+      breakfast: normalizeMealSlot(meals?.breakfast),
+      lunch: normalizeMealSlot(meals?.lunch),
+      dinner: normalizeMealSlot(meals?.dinner),
+    };
+  }
+
+  const normalized = {
+    id: mealPlan.id || makeId("meal-plan"),
+    goal: normalizeText(mealPlan.goal, 40),
+    summary: normalizeText(mealPlan.summary, 240),
+    imageUrl: normalizeImageUrl(mealPlan.imageUrl || ""),
+    ingredientProductIds: Array.isArray(mealPlan.ingredientProductIds)
+      ? mealPlan.ingredientProductIds
+      : [],
+    schedule: normalizedSchedule,
+  };
+
+  const list = ensureDb().mealPlans;
+  const index = list.findIndex((entry) => entry.id === normalized.id);
+  if (index >= 0) list[index] = { ...list[index], ...normalized };
+  else list.unshift(normalized);
+
+  persistSet(COLLECTIONS.mealPlans, normalized.id, normalized);
+  return normalized;
+}
+
+export function updateMealPlanMealImage(planId, day, slot, imageUrl, actor) {
+  requireAdmin(actor);
+  const target = ensureDb().mealPlans.find((plan) => plan.id === planId);
+  if (!target) return null;
+  const safeDay = normalizeText(day, 20);
+  const safeSlot = normalizeText(slot, 20).toLowerCase();
+  if (!["breakfast", "lunch", "dinner"].includes(safeSlot)) {
+    throw new Error("Invalid meal slot.");
+  }
+  const safeImageUrl = normalizeImageUrl(imageUrl);
+
+  const currentSlot = target.schedule?.[safeDay]?.[safeSlot];
+  const currentTitle =
+    typeof currentSlot === "string"
+      ? currentSlot
+      : String(currentSlot?.title || "");
+  const nextSlot = { title: currentTitle, imageUrl: safeImageUrl };
+  const nextDay = {
+    ...(target.schedule?.[safeDay] || {}),
+    [safeSlot]: nextSlot,
+  };
+  target.schedule = {
+    ...(target.schedule || {}),
+    [safeDay]: nextDay,
+  };
+
+  persistSet(COLLECTIONS.mealPlans, target.id, target);
+  return { ...target };
 }
 
 export function listUsers() {
@@ -173,8 +425,16 @@ export async function ensureUserProfileForAuth(authUser) {
 }
 
 export function createCustomer({ fullName, email, password }) {
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = normalizeEmail(email);
   const db = ensureDb();
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    throw new Error("Invalid email address.");
+  }
+
+  if (String(password || "").length < 8) {
+    throw new Error("Password must be at least 8 characters.");
+  }
 
   if (db.users.some((u) => u.email.toLowerCase() === normalizedEmail)) {
     throw new Error("A user with this email already exists.");
@@ -182,7 +442,7 @@ export function createCustomer({ fullName, email, password }) {
 
   const user = {
     id: makeId("u"),
-    fullName: fullName.trim(),
+    fullName: normalizeText(fullName, 80),
     email: normalizedEmail,
     password,
     role: "customer",
@@ -200,7 +460,7 @@ export function createCustomer({ fullName, email, password }) {
 }
 
 export function authenticateUser({ email, password }) {
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = normalizeEmail(email);
 
   const user = ensureDb().users.find(
     (u) => u.email.toLowerCase() === normalizedEmail && u.password === password
@@ -212,13 +472,19 @@ export function authenticateUser({ email, password }) {
   return safeUser;
 }
 
-export function updateUserProfile(userId, values) {
+export function updateUserProfile(userId, values, actor) {
+  requireSelfOrAdmin(userId, actor);
   const target = ensureDb().users.find((u) => u.id === userId);
   if (!target) return null;
 
-  if (typeof values.fullName === "string") target.fullName = values.fullName.trim();
-  if (typeof values.savedGoal === "string") target.savedGoal = values.savedGoal;
-  if (values.savedBudget !== undefined) target.savedBudget = values.savedBudget;
+  if (typeof values.fullName === "string") target.fullName = normalizeText(values.fullName, 80);
+  if (typeof values.savedGoal === "string") {
+    const allowed = new Set(["", "Weight Loss", "Maintenance", "Lean Muscle"]);
+    target.savedGoal = allowed.has(values.savedGoal) ? values.savedGoal : "";
+  }
+  if (values.savedBudget !== undefined) {
+    target.savedBudget = normalizeInt(values.savedBudget, 0, 50000, 0);
+  }
 
   persistSet(COLLECTIONS.users, target.id, target);
 
@@ -237,31 +503,32 @@ export function incrementProductViews(productId) {
 }
 
 export function upsertProduct(product) {
+  requireAdmin(product?.actor);
+
+  const name = normalizeText(product.name, 120);
+  if (!name) throw new Error("Product name is required.");
+  const price = clampNumber(parseNumber(product.price, 0), 0, 100000);
+  const cost = clampNumber(parseNumber(product.cost, 0), 0, 100000);
+  const calories = normalizeInt(product.calories, 0, 5000, 0);
+  const protein = normalizeInt(product.protein, 0, 500, 0);
+
   const normalized = {
     id: product.id || makeId("p"),
-    name: (product.name || "").trim(),
-    price: Number(product.price) || 0,
-    cost: Number(product.cost) || 0,
-    categoryId: product.categoryId,
-    tags: Array.isArray(product.tags)
-      ? product.tags.map((t) => t.trim()).filter(Boolean)
-      : String(product.tags || "")
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
-    calories: Number(product.calories) || 0,
-    protein: Number(product.protein) || 0,
-    goalBadges: Array.isArray(product.goalBadges)
-      ? product.goalBadges
-      : String(product.goalBadges || "")
-          .split(",")
-          .map((g) => g.trim())
-          .filter(Boolean),
-    imageUrl: product.imageUrl || "",
+    name,
+    price,
+    cost,
+    categoryId: normalizeText(product.categoryId, 60),
+    tags: normalizeList(product.tags, 8, 30),
+    calories,
+    protein,
+    goalBadges: normalizeList(product.goalBadges, 4, 24),
+    imageUrl: normalizeImageUrl(product.imageUrl || ""),
     isPromotion: Boolean(product.isPromotion),
-    viewsCount: Number(product.viewsCount) || 0,
-    soldCount: Number(product.soldCount) || 0,
+    viewsCount: normalizeInt(product.viewsCount, 0, 1000000, 0),
+    soldCount: normalizeInt(product.soldCount, 0, 1000000, 0),
   };
+
+  if (!normalized.categoryId) throw new Error("Category is required.");
 
   const list = ensureDb().products;
   const index = list.findIndex((p) => p.id === normalized.id);
@@ -271,7 +538,8 @@ export function upsertProduct(product) {
   persistSet(COLLECTIONS.products, normalized.id, normalized);
 }
 
-export function deleteProduct(productId) {
+export function deleteProduct(productId, actor) {
+  requireAdmin(actor);
   const db = ensureDb();
   db.products = db.products.filter((p) => p.id !== productId);
 
@@ -287,11 +555,14 @@ export function deleteProduct(productId) {
   }
 }
 
-export function upsertCategory(category) {
+export function upsertCategory(category, actor) {
+  requireAdmin(actor);
   const entry = {
     id: category.id || makeId("cat"),
-    name: String(category.name || "").trim(),
+    name: normalizeText(category.name, 60),
   };
+
+  if (!entry.name) throw new Error("Category name is required.");
 
   const list = ensureDb().categories;
   const index = list.findIndex((c) => c.id === entry.id);
@@ -301,7 +572,8 @@ export function upsertCategory(category) {
   persistSet(COLLECTIONS.categories, entry.id, entry);
 }
 
-export function deleteCategory(categoryId) {
+export function deleteCategory(categoryId, actor) {
+  requireAdmin(actor);
   const db = ensureDb();
   db.categories = db.categories.filter((c) => c.id !== categoryId);
 
@@ -322,25 +594,33 @@ export function deleteCategory(categoryId) {
   }
 }
 
-export function createOrder({ userId, items, paymentType }) {
+export function createOrder({ userId, items, paymentType, actor }) {
+  requireSelfOrAdmin(userId, actor);
   const db = ensureDb();
+  const allowedPayments = new Set(["Card", "Cash", "PayPal"]);
+  const safePaymentType = allowedPayments.has(paymentType) ? paymentType : "Card";
 
   const pricedItems = items
     .map((item) => {
       const product = db.products.find((p) => p.id === item.id);
       if (!product) return null;
-      const qty = Number(item.qty) || 1;
+      const qty = normalizeInt(item.qty, 1, 99, 1);
       return {
         productId: product.id,
-        name: product.name,
+        name: normalizeText(product.name, 120),
         qty,
         unitPrice: product.price,
         unitCost: product.cost,
         lineTotal: qty * product.price,
         lineCost: qty * product.cost,
+        imageUrl: product.imageUrl || "",
       };
     })
     .filter(Boolean);
+
+  if (!pricedItems.length) {
+    throw new Error("Order has no valid items.");
+  }
 
   const subTotal = pricedItems.reduce((sum, item) => sum + item.lineTotal, 0);
   const totalCost = pricedItems.reduce((sum, item) => sum + item.lineCost, 0);
@@ -352,7 +632,7 @@ export function createOrder({ userId, items, paymentType }) {
     subTotal,
     totalCost,
     profit: subTotal - totalCost,
-    paymentType,
+    paymentType: safePaymentType,
     status: "Complete",
     createdAt: new Date().toISOString(),
   };
@@ -390,6 +670,9 @@ export function getWishlistProductIds(userId) {
 
 export function toggleWishlistItem(userId, productId) {
   if (!userId) return [];
+  if (!ensureDb().products.some((product) => product.id === productId)) {
+    throw new Error("Invalid product for wishlist.");
+  }
 
   const db = ensureDb();
   let wishlist = db.wishlists.find((w) => w.userId === userId);

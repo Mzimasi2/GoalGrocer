@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import ProductCard from "../components/ProductCard";
@@ -50,6 +50,24 @@ export default function Store() {
     () => products.filter((product) => product.isPromotion).length,
     [products]
   );
+
+  const heroProducts = useMemo(() => {
+    return [...products]
+      .filter((product) => !product.name.toLowerCase().includes("tuna"))
+      .sort((a, b) => {
+        if (a.isPromotion !== b.isPromotion) {
+          return Number(b.isPromotion) - Number(a.isPromotion);
+        }
+        return (b.viewsCount || 0) - (a.viewsCount || 0);
+      })
+      .slice(0, 12);
+  }, [products]);
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+
+  const heroProduct = useMemo(() => {
+    if (heroProducts.length === 0) return null;
+    return heroProducts[heroSlideIndex % heroProducts.length];
+  }, [heroProducts, heroSlideIndex]);
 
   const averagePrice = useMemo(() => {
     if (products.length === 0) return 0;
@@ -133,115 +151,163 @@ export default function Store() {
     Number(Boolean(tag)) +
     Number(sort !== "relevance");
 
+  useEffect(() => {
+    if (heroProducts.length <= 1) return undefined;
+
+    const timer = setInterval(() => {
+      setHeroSlideIndex((prev) => (prev + 1) % heroProducts.length);
+    }, 2400);
+
+    return () => clearInterval(timer);
+  }, [heroProducts.length]);
+
   return (
     <AppShell title="Store" subtitle="Premium nutrition marketplace curated for your goals.">
       <div className="store-page">
-        <section className="card store-hero">
-          <div className="store-hero-content">
-            <p className="store-eyebrow">GoalGrocer Signature Market</p>
-            <h2>Shop clean groceries with confidence</h2>
-            <p>
-              Discover top-rated products designed for Weight Loss and Maintenance plans.
-            </p>
-            <div className="store-kpi-row">
-              <article>
-                <small>Live products</small>
-                <strong>{products.length}</strong>
-              </article>
-              <article>
-                <small>Promotions</small>
-                <strong>{promoCount}</strong>
-              </article>
-              <article>
-                <small>Average price</small>
-                <strong>R{averagePrice}</strong>
-              </article>
-            </div>
-          </div>
-          <div className="store-hero-glow" />
-        </section>
-
-        <section className="card store-filter-panel">
-          <div className="store-filter-head">
-            <div>
-              <h3>Refine your selection</h3>
-              <p>{activeFilterCount} active filter{activeFilterCount === 1 ? "" : "s"}</p>
-            </div>
-            <button className="btn btn-ghost" onClick={clearFilters}>
-              Reset all
-            </button>
-          </div>
-
-          <div className="filter-grid store-filter-grid">
-            <input
-              className="field"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by product, category, or keyword"
-            />
-
-            <select
-              className="field"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+        <div className="store-inner">
+          <section className="store-department-bar" aria-label="Departments">
+            <button
+              className={`store-department-chip ${category === "All" ? "is-active" : ""}`}
+              onClick={() => setCategory("All")}
+              type="button"
             >
-              <option>All</option>
-              {categories.map((c) => (
-                <option key={c.id}>{c.name}</option>
-              ))}
-            </select>
-
-            <select className="field" value={goal} onChange={(e) => setGoal(e.target.value)}>
-              <option>All</option>
-              <option>Weight Loss</option>
-              <option>Maintenance</option>
-            </select>
-
-            <input
-              className="field"
-              type="number"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              placeholder="Max price (R)"
-            />
-
-            <select className="field" value={tag} onChange={(e) => setTag(e.target.value)}>
-              <option value="">All tags</option>
-              {tagOptions.map((tagOption) => (
-                <option key={tagOption} value={tagOption}>
-                  {tagOption}
-                </option>
-              ))}
-            </select>
-
-            <select className="field" value={sort} onChange={(e) => setSort(e.target.value)}>
-              <option value="relevance">Sort: Relevance</option>
-              <option value="price-asc">Price low to high</option>
-              <option value="price-desc">Price high to low</option>
-              <option value="top-sold">Best sellers</option>
-            </select>
-          </div>
-        </section>
-
-        <section>
-          <div className="section-head store-results-head">
-            <h3>{filteredProducts.length} products</h3>
-            <small>Smart nutrition picks for your selected criteria</small>
-          </div>
-          <div className="product-grid store-product-grid">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                categoryName={categoryMap[product.categoryId]}
-                onAdd={addToCart}
-                onView={handleView}
-                onWishlist={handleWishlist}
-                wishlistActive={wishlistIds.includes(product.id)}
-              />
+              Shop All
+            </button>
+            {categories.map((item) => (
+              <button
+                key={item.id}
+                className={`store-department-chip ${category === item.name ? "is-active" : ""}`}
+                onClick={() => setCategory(item.name)}
+                type="button"
+              >
+                {item.name}
+              </button>
             ))}
+          </section>
+
+          <section className="store-hero">
+            <div className="store-hero-media">
+              {heroProduct?.imageUrl ? (
+                <img src={heroProduct.imageUrl} alt={heroProduct.name} loading="lazy" />
+              ) : (
+                <div className="hero-media-fallback">GoalGrocer</div>
+              )}
+            </div>
+
+            <div className="store-hero-content">
+              <p className="store-eyebrow">GoalGrocer Signature Market</p>
+              <h2>Buy any 4 for 3 on selected healthy picks</h2>
+              <p>
+                Build your cart from high-protein, low-calorie essentials and unlock bundle savings.
+              </p>
+              <div className="store-kpi-row">
+                <article>
+                  <small>Live products</small>
+                  <strong>{products.length}</strong>
+                </article>
+                <article>
+                  <small>Promotions</small>
+                  <strong>{promoCount}</strong>
+                </article>
+                <article>
+                  <small>Average price</small>
+                  <strong>R{averagePrice}</strong>
+                </article>
+              </div>
+              <button className="btn btn-primary store-hero-cta" onClick={() => setSort("top-sold")}>
+                Shop best sellers
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <section className="store-filter-shell">
+          <div className="store-inner">
+            <section className="card store-filter-panel">
+              <div className="store-filter-head">
+                <div>
+                  <h3>Refine your selection</h3>
+                  <p>{activeFilterCount} active filter{activeFilterCount === 1 ? "" : "s"}</p>
+                </div>
+                <button className="btn btn-ghost" onClick={clearFilters}>
+                  Reset all
+                </button>
+              </div>
+
+              <div className="filter-grid store-filter-grid">
+                <input
+                  className="field"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search by product, category, or keyword"
+                />
+
+                <select
+                  className="field"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  <option>All</option>
+                  {categories.map((c) => (
+                    <option key={c.id}>{c.name}</option>
+                  ))}
+                </select>
+
+                <select className="field" value={goal} onChange={(e) => setGoal(e.target.value)}>
+                  <option>All</option>
+                  <option>Weight Loss</option>
+                  <option>Maintenance</option>
+                </select>
+
+                <input
+                  className="field"
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder="Max price (R)"
+                />
+
+                <select className="field" value={tag} onChange={(e) => setTag(e.target.value)}>
+                  <option value="">All tags</option>
+                  {tagOptions.map((tagOption) => (
+                    <option key={tagOption} value={tagOption}>
+                      {tagOption}
+                    </option>
+                  ))}
+                </select>
+
+                <select className="field" value={sort} onChange={(e) => setSort(e.target.value)}>
+                  <option value="relevance">Sort: Relevance</option>
+                  <option value="price-asc">Price low to high</option>
+                  <option value="price-desc">Price high to low</option>
+                  <option value="top-sold">Best sellers</option>
+                </select>
+              </div>
+            </section>
           </div>
         </section>
+
+        <div className="store-inner">
+          <section>
+            <div className="section-head store-results-head">
+              <h3>{filteredProducts.length} products</h3>
+              <small>Smart nutrition picks for your selected criteria</small>
+            </div>
+            <div className="product-grid store-product-grid">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  categoryName={categoryMap[product.categoryId]}
+                  onAdd={addToCart}
+                  onView={handleView}
+                  onWishlist={handleWishlist}
+                  wishlistActive={wishlistIds.includes(product.id)}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
       
     </AppShell>

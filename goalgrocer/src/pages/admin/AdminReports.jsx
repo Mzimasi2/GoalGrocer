@@ -2,6 +2,30 @@ import AppShell from "../../components/AppShell";
 import { buildReports } from "../../services/db";
 import { currency } from "../../services/format";
 
+function MetricBars({ rows, valueKey, labelKey, formatter = (value) => value }) {
+  const max = Math.max(...rows.map((row) => Number(row[valueKey] || 0)), 1);
+
+  return (
+    <div className="metric-bars">
+      {rows.map((row) => {
+        const value = Number(row[valueKey] || 0);
+        const width = `${Math.max(6, Math.round((value / max) * 100))}%`;
+        return (
+          <article key={row.id || row[labelKey]} className="metric-row">
+            <div className="metric-row-head">
+              <strong>{row[labelKey]}</strong>
+              <span>{formatter(value)}</span>
+            </div>
+            <div className="metric-track">
+              <div className="metric-fill" style={{ width }} />
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AdminReports() {
   const reports = buildReports();
 
@@ -46,46 +70,22 @@ export default function AdminReports() {
 
       <section className="card">
         <h3>Best Selling Products</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Sold Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.product.bestSellingProducts.map((product) => (
-                <tr key={product.id}>
-                  <td>{product.name}</td>
-                  <td>{product.soldCount || 0}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <MetricBars
+          rows={reports.product.bestSellingProducts}
+          labelKey="name"
+          valueKey="soldCount"
+          formatter={(value) => `${value} sold`}
+        />
       </section>
 
       <section className="card">
         <h3>Most Viewed Products</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Views</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.product.mostViewedProducts.map((product) => (
-                <tr key={product.id}>
-                  <td>{product.name}</td>
-                  <td>{product.viewsCount || 0}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <MetricBars
+          rows={reports.product.mostViewedProducts}
+          labelKey="name"
+          valueKey="viewsCount"
+          formatter={(value) => `${value} views`}
+        />
       </section>
 
       <section className="card">

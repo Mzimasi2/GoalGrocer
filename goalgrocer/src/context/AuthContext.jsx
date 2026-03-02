@@ -61,7 +61,7 @@ export function AuthProvider({ children }) {
 
   function savePreferences({ savedGoal, savedBudget, fullName }) {
     if (!user) return;
-    const updated = updateUserProfile(user.id, { savedGoal, savedBudget, fullName });
+    const updated = updateUserProfile(user.id, { savedGoal, savedBudget, fullName }, user);
     if (updated) setUser(updated);
   }
 

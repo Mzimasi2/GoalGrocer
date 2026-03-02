@@ -1,3 +1,9 @@
+import {
+  GOAL_INGREDIENT_PRODUCT_IDS,
+  GOAL_PLAN_CARDS,
+  WEEKLY_MEAL_PLANS,
+} from "./weeklyPlans";
+
 export const seedCategories = [
   { id: "cat-protein", name: "Protein" },
   { id: "cat-dairy", name: "Dairy" },
@@ -357,3 +363,21 @@ export const seedUsers = [
     createdAt: new Date().toISOString(),
   },
 ];
+
+export const seedMealPlans = GOAL_PLAN_CARDS.map((card) => ({
+  id: card.goal.toLowerCase().replace(/\s+/g, "-"),
+  goal: card.goal,
+  summary: card.summary,
+  imageUrl: card.imageUrl || "",
+  ingredientProductIds: GOAL_INGREDIENT_PRODUCT_IDS[card.goal] || [],
+  schedule: Object.fromEntries(
+    Object.entries(WEEKLY_MEAL_PLANS[card.goal] || {}).map(([day, meals]) => [
+      day,
+      {
+        breakfast: { title: meals.breakfast || "", imageUrl: "" },
+        lunch: { title: meals.lunch || "", imageUrl: "" },
+        dinner: { title: meals.dinner || "", imageUrl: "" },
+      },
+    ])
+  ),
+}));

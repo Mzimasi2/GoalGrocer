@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import AppShell from "../../components/AppShell";
+import { useAuth } from "../../context/AuthContext";
 import {
   deleteProduct,
   listCategories,
@@ -22,6 +23,7 @@ const emptyForm = {
 };
 
 export default function AdminProducts() {
+  const { user } = useAuth();
   const [products, setProducts] = useState(() => listProducts());
   const [categories, setCategories] = useState(() => listCategories());
   const [form, setForm] = useState(emptyForm);
@@ -38,7 +40,7 @@ export default function AdminProducts() {
 
   function onSubmit(event) {
     event.preventDefault();
-    upsertProduct(form);
+    upsertProduct({ ...form, actor: user });
     setForm(emptyForm);
     refresh();
   }
@@ -52,7 +54,7 @@ export default function AdminProducts() {
   }
 
   function onDelete(productId) {
-    deleteProduct(productId);
+    deleteProduct(productId, user);
     refresh();
   }
 

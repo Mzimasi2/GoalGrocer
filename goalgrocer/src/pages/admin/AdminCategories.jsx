@@ -1,8 +1,10 @@
 import { useState } from "react";
 import AppShell from "../../components/AppShell";
+import { useAuth } from "../../context/AuthContext";
 import { deleteCategory, listCategories, upsertCategory } from "../../services/db";
 
 export default function AdminCategories() {
+  const { user } = useAuth();
   const [categories, setCategories] = useState(() => listCategories());
   const [editingId, setEditingId] = useState("");
   const [name, setName] = useState("");
@@ -14,7 +16,7 @@ export default function AdminCategories() {
   function handleSubmit(event) {
     event.preventDefault();
     if (!name.trim()) return;
-    upsertCategory({ id: editingId, name });
+    upsertCategory({ id: editingId, name }, user);
     setEditingId("");
     setName("");
     refresh();
@@ -26,7 +28,7 @@ export default function AdminCategories() {
   }
 
   function handleDelete(id) {
-    deleteCategory(id);
+    deleteCategory(id, user);
     refresh();
   }
 
